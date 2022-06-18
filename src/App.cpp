@@ -73,6 +73,10 @@ void App::Run()
 
 	time.init(1000);
 
+	seed = std::time(NULL);
+	srand(seed);
+	Canis::Log("seed : " + std::to_string(seed));
+
 	Load();
 
 	window.MouseLock(mouseLock);
@@ -167,7 +171,10 @@ void App::Loop()
 
 		float fps = time.endFrame();
 		
-		window.SetWindowName("Canis : Game Name fps : " + std::to_string(fps) + " deltaTime : " + std::to_string(deltaTime) + " Enitity : " + std::to_string(entity_registry.size()));
+		window.SetWindowName("Canis : Game Name fps : " + std::to_string(fps)
+		 + " deltaTime : " + std::to_string(deltaTime)
+		 + " Enitity : " + std::to_string(entity_registry.size())
+		 + " Rendered : " + std::to_string(renderMeshSystem.entities_rendered));
 	}
 }
 void App::Update()
@@ -260,19 +267,171 @@ void App::InputUpdate()
 void App::LoadECS()
 {
 	const auto entity = entity_registry.create();
-	entity_registry.emplace<TransformComponent>(entity,
+	entity_registry.emplace<Canis::TransformComponent>(entity,
 		true, // active
 		glm::vec3(0.0f, 0.0f, 0.0f), // position
 		glm::vec3(0.0f, 0.0f, 0.0f), // rotation
 		glm::vec3(1, 1, 1) // scale
 	);
-	entity_registry.emplace<ColorComponent>(entity,
+	entity_registry.emplace<Canis::ColorComponent>(entity,
 		glm::vec4(0.15f, 0.52f, 0.30f, 1.0f) // #26854c
 	);
-	entity_registry.emplace<MeshComponent>(entity,
+	entity_registry.emplace<Canis::MeshComponent>(entity,
 		whiteCubeVAO,
 		whiteCubeSize
 	);
+	entity_registry.emplace<Canis::SphereColliderComponent>(entity,
+		glm::vec3(0.0f),
+		1.5f
+	);
+
+	struct PositionAndSize {
+		glm::vec3 position;
+		float radius;
+	};
+
+	std::vector<PositionAndSize> positions_and_size;
+
+	PositionAndSize cameraPlacementInfo = {
+		camera.Position,
+		5.0f
+	};
+
+	positions_and_size.push_back(cameraPlacementInfo);
+
+	// spawn normal asteroid
+	int max_num_of_normal_asteroid = 500;
+	int current_num_of_normal_asteroid = 0;
+	glm::vec3 min_position = glm::vec3(-30.0f,-30.0f,-30.0f);
+	glm::vec3 max_position = glm::vec3(30.0f,30.0f,30.0f);
+	glm::vec2 size_range = glm::vec2(0.5f,3.0f);
+
+	while(max_num_of_normal_asteroid != current_num_of_normal_asteroid)
+	{
+		bool not_found = true;
+
+		PositionAndSize position_info = {};
+
+		while(not_found)
+		{
+			// pick random position and size
+			// this could be better
+			position_info.position = glm::vec3(
+				min_position.x + rand()%int(max_position.x - min_position.x),
+				min_position.y + rand()%int(max_position.y - min_position.y),
+				min_position.z + rand()%int(max_position.z - min_position.z)
+			);
+
+			position_info.radius = size_range.x + rand()%int(size_range.y - size_range.x);
+
+			// check if position is okay
+
+			not_found = false;
+
+			for(int i = 0; i < positions_and_size.size(); i++)
+			{
+				float distance = glm::distance(position_info.position, positions_and_size[i].position);
+				float entity_spacing_buffer = position_info.radius + positions_and_size[i].radius;
+
+				if (distance < entity_spacing_buffer)
+				{
+					not_found = true;
+					continue;
+				}
+			}
+		}
+
+		// TODO : randomize rotation
+
+		// create entity
+		const auto entity = entity_registry.create();
+		entity_registry.emplace<Canis::TransformComponent>(entity,
+			true, // active
+			position_info.position, // position
+			glm::vec3(float(rand()%360), float(rand()%360), float(rand()%360)), // rotation
+			glm::vec3(position_info.radius) // scale
+		);
+		entity_registry.emplace<Canis::ColorComponent>(entity,
+			glm::vec4(0.15f, 0.52f, 0.30f, 1.0f) // #26854c
+		);
+		entity_registry.emplace<Canis::MeshComponent>(entity,
+			whiteCubeVAO,
+			whiteCubeSize
+		);
+		entity_registry.emplace<Canis::SphereColliderComponent>(entity,
+			glm::vec3(0.0f),
+			1.5f
+		);
+
+		positions_and_size.push_back(position_info);
+
+		current_num_of_normal_asteroid++;
+	}
+
+	// spawn metal asteroid
+	int max_num_of_metal_asteroid = 50;
+	int current_num_of_metal_asteroid = 0;
+	while(max_num_of_metal_asteroid != current_num_of_metal_asteroid)
+	{
+		bool not_found = true;
+
+		PositionAndSize position_info = {};
+
+		while(not_found)
+		{
+			// pick random position and size
+			// this could be better
+			position_info.position = glm::vec3(
+				min_position.x + rand()%int(max_position.x - min_position.x),
+				min_position.y + rand()%int(max_position.y - min_position.y),
+				min_position.z + rand()%int(max_position.z - min_position.z)
+			);
+
+			position_info.radius = size_range.x + rand()%int(size_range.y - size_range.x);
+
+			// check if position is okay
+
+			not_found = false;
+
+			for(int i = 0; i < positions_and_size.size(); i++)
+			{
+				float distance = glm::distance(position_info.position, positions_and_size[i].position);
+				float entity_spacing_buffer = position_info.radius + positions_and_size[i].radius;
+
+				if (distance < entity_spacing_buffer)
+				{
+					not_found = true;
+					continue;
+				}
+			}
+		}
+
+		// TODO : randomize rotation
+
+		// create entity
+		const auto entity = entity_registry.create();
+		entity_registry.emplace<Canis::TransformComponent>(entity,
+			true, // active
+			position_info.position, // position
+			glm::vec3(float(rand()%360), float(rand()%360), float(rand()%360)), // rotation
+			glm::vec3(position_info.radius) // scale
+		);
+		entity_registry.emplace<Canis::ColorComponent>(entity,
+			glm::vec4(0.15f, 0.8f, 0.30f, 1.0f)
+		);
+		entity_registry.emplace<Canis::MeshComponent>(entity,
+			whiteCubeVAO,
+			whiteCubeSize
+		);
+		entity_registry.emplace<Canis::SphereColliderComponent>(entity,
+			glm::vec3(0.0f),
+			1.5f
+		);
+
+		positions_and_size.push_back(position_info);
+
+		current_num_of_metal_asteroid++;
+	}
 
 	renderSkyboxSystem.faces = std::vector<std::string>
 	{

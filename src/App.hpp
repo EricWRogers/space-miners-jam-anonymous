@@ -1,4 +1,7 @@
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <SDL.h>
 #include <math.h>
 #include <chrono>
@@ -30,6 +33,7 @@
 #include <Canis/ECS/Components/RectTransformComponent.hpp>
 #include <Canis/ECS/Components/TextComponent.hpp>
 #include <Canis/ECS/Components/MeshComponent.hpp>
+#include <Canis/ECS/Components/SphereColliderComponent.hpp>
 
 #ifdef __linux__
 using namespace std::chrono::_V2;
@@ -79,9 +83,9 @@ private:
 
     Canis::Camera camera = Canis::Camera(glm::vec3(0.0f, 3.0f, 3.0f),glm::vec3(0.0f, 1.0f, 0.0f),Canis::YAW-90.0f,Canis::PITCH-45.0f);
 
-    RenderMeshSystem renderMeshSystem;
-    RenderSkyboxSystem renderSkyboxSystem;
-    RenderTextSystem renderTextSystem;
+    Canis::RenderMeshSystem renderMeshSystem;
+    Canis::RenderSkyboxSystem renderSkyboxSystem;
+    Canis::RenderTextSystem renderTextSystem;
 
     // move out to external class
     unsigned int whiteCubeVAO, whiteCubeVBO;
@@ -104,5 +108,7 @@ private:
     double deltaTime;
 
     Canis::AStar aStar;
+
+    unsigned int seed;
     
 };
