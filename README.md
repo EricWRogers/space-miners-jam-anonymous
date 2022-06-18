@@ -1,1 +1,1 @@
-# canis-template
+# space-miners-jam-anonymous

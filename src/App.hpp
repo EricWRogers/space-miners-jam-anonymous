@@ -22,6 +22,7 @@
 #include <Canis/GameHelper/AStar.hpp>
 
 #include <Canis/ECS/Systems/RenderMeshSystem.hpp>
+#include <Canis/ECS/Systems/RenderSkyboxSystem.hpp>
 #include <Canis/ECS/Systems/RenderTextSystem.hpp>
 
 #include <Canis/ECS/Components/TransformComponent.hpp>
@@ -78,13 +79,16 @@ private:
 
     Canis::Camera camera = Canis::Camera(glm::vec3(0.0f, 3.0f, 3.0f),glm::vec3(0.0f, 1.0f, 0.0f),Canis::YAW-90.0f,Canis::PITCH-45.0f);
 
+    RenderMeshSystem renderMeshSystem;
+    RenderSkyboxSystem renderSkyboxSystem;
+    RenderTextSystem renderTextSystem;
+
     // move out to external class
     unsigned int whiteCubeVAO, whiteCubeVBO;
 
     int whiteCubeSize;
 
-    Canis::GLTexture texture1 = {};
-    Canis::GLTexture texture2 = {};
+    Canis::GLTexture texture = {};
 
     Canis::GLTexture diffuseColorPaletteTexture = {};
     Canis::GLTexture specularColorPaletteTexture = {};

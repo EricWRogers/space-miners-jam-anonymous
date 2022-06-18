@@ -47,9 +47,6 @@ float vertices[] = {
 	-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
 };
 
-RenderMeshSystem renderMeshSystem;
-RenderTextSystem renderTextSystem;
-
 App::App()
 {
 	
@@ -179,10 +176,12 @@ void App::Update()
 }
 void App::Draw()
 {
-	glDepthFunc(GL_LESS); 
+	glDepthFunc(GL_LESS);
+	glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
 	renderMeshSystem.UpdateComponents(deltaTime, entity_registry);
+	renderSkyboxSystem.UpdateComponents(deltaTime, entity_registry);
 	renderTextSystem.UpdateComponents(deltaTime, entity_registry);
 }
 void App::LateUpdate() {}
@@ -275,9 +274,22 @@ void App::LoadECS()
 		whiteCubeSize
 	);
 
-	renderTextSystem.Init();
+	renderSkyboxSystem.faces = std::vector<std::string>
+	{
+		"assets/textures/space-nebulas-skybox/skybox_left.png",
+		"assets/textures/space-nebulas-skybox/skybox_right.png",
+		"assets/textures/space-nebulas-skybox/skybox_up.png",
+		"assets/textures/space-nebulas-skybox/skybox_down.png",
+		"assets/textures/space-nebulas-skybox/skybox_front.png",
+		"assets/textures/space-nebulas-skybox/skybox_back.png"
+	};
+	renderSkyboxSystem.window = &window;
+	renderSkyboxSystem.camera = &camera;
+	renderSkyboxSystem.Init();
+
 	renderTextSystem.camera = &camera;
 	renderTextSystem.window = &window;
+	renderTextSystem.Init();
 
 	renderMeshSystem.shader = &shader;
 	renderMeshSystem.camera = &camera;
