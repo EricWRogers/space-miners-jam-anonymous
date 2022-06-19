@@ -35,6 +35,13 @@
 #include <Canis/ECS/Components/MeshComponent.hpp>
 #include <Canis/ECS/Components/SphereColliderComponent.hpp>
 
+#include "ECS/Systems/BulletSystem.hpp"
+#include "ECS/Systems/PlayerShipSystem.hpp"
+
+#include "ECS/Components/BulletComponent.hpp"
+#include "ECS/Components/HealthComponent.hpp"
+#include "ECS/Components/PlayerShipComponent.hpp"
+
 #ifdef __linux__
 using namespace std::chrono::_V2;
 #elif _WIN32
@@ -81,16 +88,22 @@ private:
 
     Canis::InputManager inputManager;
 
-    Canis::Camera camera = Canis::Camera(glm::vec3(0.0f, 3.0f, 3.0f),glm::vec3(0.0f, 1.0f, 0.0f),Canis::YAW-90.0f,Canis::PITCH-45.0f);
+    Canis::Camera camera = Canis::Camera(glm::vec3(0.0f, 0.15f, -0.3f),glm::vec3(0.0f, 1.0f, 0.0f),Canis::YAW+90.0f,Canis::PITCH+0.0f);
 
     Canis::RenderMeshSystem renderMeshSystem;
     Canis::RenderSkyboxSystem renderSkyboxSystem;
     Canis::RenderTextSystem renderTextSystem;
 
-    // move out to external class
-    unsigned int whiteCubeVAO, whiteCubeVBO;
+    PlayerShipSystem playerShipSystem;
 
-    int whiteCubeSize;
+    // move out to external class
+    unsigned int whiteCubeVAO, whiteCubeVBO,
+                asteroidVAO, asteroidVBO,
+                asteroidMetalVAO, asteroidMetalVBO,
+                playerVAO, playerVBO,
+                playerGlassVAO, playerGlassVBO;
+
+    int whiteCubeSize, asteroidSize, asteroidMetalSize, playerSize, playerGlassSize;
 
     Canis::GLTexture texture = {};
 
