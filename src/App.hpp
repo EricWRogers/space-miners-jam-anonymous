@@ -35,12 +35,18 @@
 #include <Canis/ECS/Components/MeshComponent.hpp>
 #include <Canis/ECS/Components/SphereColliderComponent.hpp>
 
+#include "ECS/Systems/AsteroidSystem.hpp"
 #include "ECS/Systems/BulletSystem.hpp"
 #include "ECS/Systems/PlayerShipSystem.hpp"
 
+#include "ECS/Components/AsteroidComponent.hpp"
 #include "ECS/Components/BulletComponent.hpp"
 #include "ECS/Components/HealthComponent.hpp"
 #include "ECS/Components/PlayerShipComponent.hpp"
+
+#include "Scripts/ScoreSystem.hpp"
+#include "Scripts/Wallet.hpp"
+#include "Scripts/HUDManager.hpp"
 
 #ifdef __linux__
 using namespace std::chrono::_V2;
@@ -95,6 +101,12 @@ private:
     Canis::RenderTextSystem renderTextSystem;
 
     PlayerShipSystem playerShipSystem;
+    BulletSystem bulletSystem;
+    AsteroidSystem asteroidSystem;
+
+    Wallet wallet;
+    ScoreSystem scoreSystem;
+    HUDManager hudManager;
 
     // move out to external class
     unsigned int whiteCubeVAO, whiteCubeVBO,

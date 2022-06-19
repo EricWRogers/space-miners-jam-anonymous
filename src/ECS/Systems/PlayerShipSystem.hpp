@@ -14,6 +14,7 @@
 
 #include <Canis/ECS/Components/TransformComponent.hpp>
 
+#include "../Components/BulletComponent.hpp"
 #include "../Components/PlayerShipComponent.hpp"
 
 class PlayerShipSystem
@@ -22,6 +23,9 @@ public:
     Canis::Camera *camera;
     Canis::InputManager *input_manager;
 
+    unsigned int bulletVAO;
+    int bulletSize;
+
     PlayerShipSystem()
     {
     }
@@ -29,6 +33,30 @@ public:
     void Init()
     {
         
+    }
+
+    void Fire(Canis::TransformComponent transform, entt::registry &registry)
+    {
+        entt::entity bullet_entity = registry.create();
+        registry.emplace<Canis::TransformComponent>(bullet_entity,
+            transform
+        );
+        registry.emplace<Canis::ColorComponent>(bullet_entity,
+            glm::vec4(0.0f,1.0f,0.0f,1.0f)
+        );
+        registry.emplace<Canis::MeshComponent>(bullet_entity,
+            bulletVAO,
+            bulletSize
+        );
+        registry.emplace<Canis::SphereColliderComponent>(bullet_entity,
+            glm::vec3(0.0f),
+            1.5f
+        );
+        registry.emplace<BulletComponent>(bullet_entity,
+            200.0f,
+            1.0f,
+            false
+        );
     }
 
     void UpdateComponents(float deltaTime, entt::registry &registry)
@@ -81,7 +109,40 @@ public:
             camera->Position = glm::vec3(glm::translate(transform.modelMatrix, ship.camera_position_offset)[3]);
             camera->Rotate(-transform.rotation.y+90.0f,-transform.rotation.x);
 
-            //camera->modelMatrix = glm::inverse(glm::rotate(glm::translate(transform.modelMatrix, ship.camera_position_offset),glm::radians(-180.0f),glm::vec3(0.0f,1.0f,0.0f)));
+            // shoot
+            ship.right_gun_cool_timer -= deltaTime;
+            ship.left_gun_cool_timer -= deltaTime;
+            if (ship.right_gun_cool_timer < 0.0f)
+                ship.right_gun_cool_timer = 0.0f;
+            if (ship.left_gun_cool_timer < 0.0f)
+                ship.left_gun_cool_timer = 0.0f;
+            
+            if (keystate[SDL_SCANCODE_RETURN]
+                 && ship.left_gun_cool_timer == 0.0f
+                 && ship.right_gun_cool_timer == 0.0f)
+            {
+                // fire right
+                ship.right_gun_cool_timer = ship.cool_down_time;
+                ship.left_gun_cool_timer = ship.cool_down_time;
+                Canis::TransformComponent right_gun_transform = transform;
+                right_gun_transform.modelMatrix = glm::translate(
+                    right_gun_transform.modelMatrix,
+                    ship.right_gun_position
+                );
+                right_gun_transform.scale = glm::vec3(0.05f,0.05f,0.1f);
+                right_gun_transform.modelMatrix = glm::scale(right_gun_transform.modelMatrix, glm::vec3(0.1f));
+                Fire(right_gun_transform, registry);
+
+                // fire left
+                Canis::TransformComponent left_gun_transform = transform;
+                left_gun_transform.modelMatrix = glm::translate(
+                    left_gun_transform.modelMatrix,
+                    ship.left_gun_position
+                );
+                left_gun_transform.scale = glm::vec3(0.05f,0.05f,0.1f);
+                left_gun_transform.modelMatrix = glm::scale(left_gun_transform.modelMatrix, glm::vec3(0.1f));
+                Fire(left_gun_transform, registry);
+            }
         }
     }
 

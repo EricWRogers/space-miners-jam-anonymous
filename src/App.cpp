@@ -364,6 +364,8 @@ void App::Loop()
 void App::Update()
 {
 	playerShipSystem.UpdateComponents(deltaTime, entity_registry);
+	bulletSystem.UpdateComponents(deltaTime, entity_registry);
+	asteroidSystem.UpdateComponents(deltaTime, entity_registry);
 }
 void App::Draw()
 {
@@ -403,7 +405,7 @@ void App::FixedUpdate(float dt)
 	if (inputManager.justPressedKey(SDLK_ESCAPE))
     {
 		mouseLock = !mouseLock;
-		camera.override_camera = !camera.override_camera;
+		//camera.override_camera = !camera.override_camera;
 
         window.MouseLock(mouseLock);
     }
@@ -510,13 +512,13 @@ void App::LoadECS()
 		player_ship_glass,
 		player_ship_body,
 		camera.Position,
-		glm::vec3(1.0f),
-		glm::vec3(1.0f),
+		glm::vec3(-0.191221f,0.079734f,0.418706f),
+		glm::vec3(0.191221f,0.079734f,0.418706f),
 		5.0f,
 		glm::vec2(1.0f),
 		glm::vec2(1.0f),
 		8.0f,
-		0.2f,
+		0.5f,
 		0.0f,
 		0.0f
 	);
@@ -608,6 +610,13 @@ void App::LoadECS()
 			glm::vec3(0.0f),
 			position_info.radius
 		);
+		entity_registry.emplace<HealthComponent>(entity,
+			2,
+			2
+		);
+		entity_registry.emplace<AsteroidComponent>(entity,
+			5.0f
+		);
 
 		positions_and_size.push_back(position_info);
 
@@ -679,6 +688,13 @@ void App::LoadECS()
 			glm::vec3(0.0f),
 			position_info.radius
 		);
+		entity_registry.emplace<HealthComponent>(entity,
+			2,
+			2
+		);
+		entity_registry.emplace<AsteroidComponent>(entity,
+			5.0f
+		);
 
 		positions_and_size.push_back(position_info);
 
@@ -695,8 +711,25 @@ void App::LoadECS()
 		"assets/textures/space-nebulas-skybox/skybox_back.png"
 	};
 
+	asteroidSystem.scoreSystem = &scoreSystem;
+	asteroidSystem.wallet = &wallet;
+
+	hudManager.inputManager = &inputManager;
+	hudManager.window = &window;
+	hudManager.wallet = &wallet;
+	hudManager.Load(entity_registry);
+
+	wallet.refRegistry = &entity_registry;
+	wallet.walletText = hudManager.walletText;
+	wallet.SetCash(50);
+
+	scoreSystem.refRegistry = &entity_registry;
+	scoreSystem.scoreText = hudManager.scoreText;
+	
 	playerShipSystem.camera = &camera;
 	playerShipSystem.input_manager = &inputManager;
+	playerShipSystem.bulletVAO = whiteCubeVAO;
+	playerShipSystem.bulletSize = whiteCubeSize;
 
 	renderSkyboxSystem.window = &window;
 	renderSkyboxSystem.camera = &camera;
