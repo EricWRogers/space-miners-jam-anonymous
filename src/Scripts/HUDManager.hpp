@@ -9,6 +9,8 @@
 #include <Canis/ECS/Components/ColorComponent.hpp>
 #include <Canis/ECS/Components/MeshComponent.hpp>
 
+#include "../ECS/Systems/PlayerShipSystem.hpp"
+
 #include "Wallet.hpp"
 
 class HUDManager
@@ -20,6 +22,7 @@ public:
     Canis::InputManager *inputManager;
     Canis::Window *window;
     Wallet *wallet;
+    PlayerShipSystem *playerShipSystem;
 
     entt::entity healthText;
     entt::entity walletText;
@@ -34,28 +37,70 @@ public:
         {
 
             // grey out what you can not buy
-            auto [right_transform, right_color] = registry.get<Canis::RectTransformComponent, Canis::ColorComponent>(right_gun_upgrade_text);
-            if (wallet->ICanAfford(100))
+            // right
+            auto [right_transform, right_color, right_text] = registry.get<Canis::RectTransformComponent, Canis::ColorComponent, Canis::TextComponent>(right_gun_upgrade_text);
+            int price = 100;
+
+            switch (playerShipSystem->right_gun_level)
+            {
+            case 0: {
+                (*right_text.text) = "[1] $100 unlock gun";
+                price = 100;
+                break;
+            }
+            case 1: {
+                (*right_text.text) = "[1] $150 increase fire rate";
+                price = 150;
+                break;
+            }
+            default:
+                (*right_text.text) = "";
+                break;
+            }
+
+            if (wallet->ICanAfford(price) || playerShipSystem->right_gun_level > 2)
                 right_color.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             else
                 right_color.color = glm::vec4(0.384f, 0.356f, 0.356f, 1.0f);
             
-            auto [color_transform, left_color] = registry.get<Canis::RectTransformComponent, Canis::ColorComponent>(left_gun_upgrade_text);
-            if (wallet->ICanAfford(100))
+            if (inputManager->isKeyPressed(SDLK_1) && wallet->ICanAfford(price))
+            {
+                // give player upgrade
+                wallet->Pay(price);
+                playerShipSystem->right_gun_level++;
+            }
+            
+            // left
+            auto [color_transform, left_color, left_text] = registry.get<Canis::RectTransformComponent, Canis::ColorComponent, Canis::TextComponent>(left_gun_upgrade_text);
+            
+            switch (playerShipSystem->left_gun_level)
+            {
+            case 0: {
+                (*left_text.text) = "[2] $100 unlock left gun";
+                price = 100;
+                break;
+            }
+            case 1: {
+                (*left_text.text) = "[2] $150 increase fire rate";
+                price = 150;
+                break;
+            }
+            default:
+                (*left_text.text) = "";
+                break;
+            }
+
+            if (wallet->ICanAfford(price) || playerShipSystem->left_gun_level > 2)
                 left_color.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             else
                 left_color.color = glm::vec4(0.384f, 0.356f, 0.356f, 1.0f);
 
-            // right
-            if (inputManager->isKeyPressed(SDLK_1) && wallet->ICanAfford(100))
-            {
-                // give player upgrade
-            }
 
-            // left
-            if (inputManager->isKeyPressed(SDLK_2) && wallet->ICanAfford(100))
+            if (inputManager->isKeyPressed(SDLK_2) && wallet->ICanAfford(price))
             {
                 // give player upgrade
+                wallet->Pay(price);
+                playerShipSystem->left_gun_level++;
             }
         }
     }
