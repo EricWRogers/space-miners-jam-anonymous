@@ -121,37 +121,46 @@ public:
             if (ship.left_gun_cool_timer < 0.0f)
                 ship.left_gun_cool_timer = 0.0f;
 
-            if (keystate[SDL_SCANCODE_RETURN] && ship.left_gun_cool_timer == 0.0f && ship.right_gun_cool_timer == 0.0f)
+            if (keystate[SDL_SCANCODE_RETURN])
             {
-                ship.right_gun_cool_timer = ship.cool_down_time;
-                ship.left_gun_cool_timer = ship.cool_down_time;
-                if (right_gun_level > 1)
-                    ship.right_gun_cool_timer /= 2.0f;
-                if (left_gun_level > 1)
-                    ship.left_gun_cool_timer /= 2.0f;
-                // fire right
-                if (right_gun_level > 0)
+                if (ship.left_gun_cool_timer == 0.0f)
                 {
-                    Canis::TransformComponent right_gun_transform = transform;
-                    right_gun_transform.modelMatrix = glm::translate(
-                        right_gun_transform.modelMatrix,
-                        ship.right_gun_position);
-                    right_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
-                    right_gun_transform.modelMatrix = glm::scale(right_gun_transform.modelMatrix, glm::vec3(0.1f));
-                    Fire(right_gun_transform, registry,right_gun_level);
+                    ship.left_gun_cool_timer = ship.cool_down_time;
+                    if (left_gun_level > 1)
+                        ship.left_gun_cool_timer /= 2.0f;
+                    
+                    // fire left
+                    if (left_gun_level > 0)
+                    {
+                        Canis::TransformComponent left_gun_transform = transform;
+                        left_gun_transform.modelMatrix = glm::translate(
+                            left_gun_transform.modelMatrix,
+                            ship.left_gun_position);
+                        left_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
+                        left_gun_transform.modelMatrix = glm::scale(left_gun_transform.modelMatrix, glm::vec3(0.1f));
+                        Fire(left_gun_transform, registry,left_gun_level);
+                    }
                 }
 
-                // fire left
-                if (left_gun_level > 0)
+                if (ship.right_gun_cool_timer == 0.0f)
                 {
-                    Canis::TransformComponent left_gun_transform = transform;
-                    left_gun_transform.modelMatrix = glm::translate(
-                        left_gun_transform.modelMatrix,
-                        ship.left_gun_position);
-                    left_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
-                    left_gun_transform.modelMatrix = glm::scale(left_gun_transform.modelMatrix, glm::vec3(0.1f));
-                    Fire(left_gun_transform, registry,left_gun_level);
-                }
+                    ship.right_gun_cool_timer = ship.cool_down_time;
+                
+                    if (right_gun_level > 1)
+                        ship.right_gun_cool_timer /= 2.0f;
+                    
+                    // fire right
+                    if (right_gun_level > 0)
+                    {
+                        Canis::TransformComponent right_gun_transform = transform;
+                        right_gun_transform.modelMatrix = glm::translate(
+                            right_gun_transform.modelMatrix,
+                            ship.right_gun_position);
+                        right_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
+                        right_gun_transform.modelMatrix = glm::scale(right_gun_transform.modelMatrix, glm::vec3(0.1f));
+                        Fire(right_gun_transform, registry,right_gun_level);
+                    }
+                }               
             }
         }
     }
