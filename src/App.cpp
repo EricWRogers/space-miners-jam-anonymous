@@ -619,7 +619,7 @@ void App::LoadECS()
 			2
 		);
 		entity_registry.emplace<AsteroidComponent>(entity,
-			5.0f
+			10.0f
 		);
 
 		positions_and_size.push_back(position_info);
@@ -697,7 +697,7 @@ void App::LoadECS()
 			2
 		);
 		entity_registry.emplace<AsteroidComponent>(entity,
-			5.0f
+			25.0f
 		);
 
 		positions_and_size.push_back(position_info);

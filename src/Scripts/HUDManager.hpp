@@ -41,7 +41,7 @@ public:
             auto [right_transform, right_color, right_text] = registry.get<Canis::RectTransformComponent, Canis::ColorComponent, Canis::TextComponent>(right_gun_upgrade_text);
             int price = 100;
 
-            switch (playerShipSystem->right_gun_level)
+            switch (playerShipSystem->gun_level)
             {
             case 0: {
                 (*right_text.text) = "[1] $100 unlock gun";
@@ -58,7 +58,7 @@ public:
                 break;
             }
 
-            if (wallet->ICanAfford(price) || playerShipSystem->right_gun_level > 2)
+            if (wallet->ICanAfford(price) || playerShipSystem->gun_level > 2)
                 right_color.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             else
                 right_color.color = glm::vec4(0.384f, 0.356f, 0.356f, 1.0f);
@@ -67,16 +67,16 @@ public:
             {
                 // give player upgrade
                 wallet->Pay(price);
-                playerShipSystem->right_gun_level++;
+                playerShipSystem->gun_level++;
             }
             
             // left
             auto [color_transform, left_color, left_text] = registry.get<Canis::RectTransformComponent, Canis::ColorComponent, Canis::TextComponent>(left_gun_upgrade_text);
             
-            switch (playerShipSystem->left_gun_level)
+            switch (playerShipSystem->center_gun_level)
             {
             case 0: {
-                (*left_text.text) = "[2] $100 unlock left gun";
+                (*left_text.text) = "[2] $200 unlock rocket launcher";
                 price = 100;
                 break;
             }
@@ -90,7 +90,7 @@ public:
                 break;
             }
 
-            if (wallet->ICanAfford(price) || playerShipSystem->left_gun_level > 2)
+            if (wallet->ICanAfford(price) || playerShipSystem->center_gun_level > 2)
                 left_color.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
             else
                 left_color.color = glm::vec4(0.384f, 0.356f, 0.356f, 1.0f);
@@ -100,7 +100,7 @@ public:
             {
                 // give player upgrade
                 wallet->Pay(price);
-                playerShipSystem->left_gun_level++;
+                playerShipSystem->center_gun_level++;
             }
         }
     }

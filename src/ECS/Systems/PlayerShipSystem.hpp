@@ -27,9 +27,8 @@ public:
     unsigned int bulletVAO;
     int bulletSize;
 
-    unsigned int right_gun_level = 1;
-    unsigned int left_gun_level = 0;
-    unsigned int center_gun_level = 1;
+    unsigned int gun_level = 0;
+    unsigned int center_gun_level = 0;
 
     PlayerShipSystem()
     {
@@ -43,7 +42,7 @@ public:
     {
         float fire_speed = 150.0f;
 
-        if (level == 2)
+        if (level == 3)
         {
             fire_speed = 250.0f;
         }
@@ -68,6 +67,9 @@ public:
     void FireRocket(Canis::TransformComponent transform, entt::registry &registry, unsigned int level)
     {
         float fire_speed = 50.0f;
+
+        if (level > 1)
+            fire_speed = 150.0f;
 
         entt::entity rocket_entity = registry.create();
         registry.emplace<Canis::TransformComponent>(rocket_entity,
@@ -153,11 +155,11 @@ public:
                 if (ship.left_gun_cool_timer == 0.0f)
                 {
                     ship.left_gun_cool_timer = ship.cool_down_time;
-                    if (left_gun_level > 1)
+                    if (gun_level > 1)
                         ship.left_gun_cool_timer /= 2.0f;
 
                     // fire left
-                    if (left_gun_level > 0)
+                    if (gun_level > 0)
                     {
                         Canis::TransformComponent left_gun_transform = transform;
                         left_gun_transform.modelMatrix = glm::translate(
@@ -165,7 +167,8 @@ public:
                             ship.left_gun_position);
                         left_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
                         left_gun_transform.modelMatrix = glm::scale(left_gun_transform.modelMatrix, glm::vec3(0.1f));
-                        Fire(left_gun_transform, registry, left_gun_level);
+                        left_gun_transform.isDirty = true;
+                        Fire(left_gun_transform, registry, gun_level);
                     }
                 }
 
@@ -173,11 +176,11 @@ public:
                 {
                     ship.right_gun_cool_timer = ship.cool_down_time;
 
-                    if (right_gun_level > 1)
+                    if (gun_level > 1)
                         ship.right_gun_cool_timer /= 2.0f;
 
                     // fire right
-                    if (right_gun_level > 0)
+                    if (true)
                     {
                         Canis::TransformComponent right_gun_transform = transform;
                         right_gun_transform.modelMatrix = glm::translate(
@@ -185,7 +188,8 @@ public:
                             ship.right_gun_position);
                         right_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
                         right_gun_transform.modelMatrix = glm::scale(right_gun_transform.modelMatrix, glm::vec3(0.1f));
-                        Fire(right_gun_transform, registry, right_gun_level);
+                        right_gun_transform.isDirty = true;
+                        Fire(right_gun_transform, registry, gun_level);
                     }
                 }
 
@@ -193,8 +197,8 @@ public:
                 {
                     ship.center_gun_cool_timer = ship.cool_down_time;
 
-                    //if (center_gun_level > 1)
-                    //    ship.center_gun_cool_timer /= 2.0f;
+                    if (center_gun_level > 1)
+                        ship.center_gun_cool_timer /= 2.0f;
 
                     // fire right
                     if (center_gun_level > 0)
@@ -205,6 +209,7 @@ public:
                             ship.center_gun_position);
                         center_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.2f);
                         center_gun_transform.modelMatrix = glm::scale(center_gun_transform.modelMatrix, glm::vec3(0.1f));
+                        center_gun_transform.isDirty = true;
                         FireRocket(center_gun_transform, registry, center_gun_level);
                     }
                 }
