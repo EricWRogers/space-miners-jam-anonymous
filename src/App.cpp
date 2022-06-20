@@ -355,7 +355,7 @@ void App::Loop()
 
 		float fps = time.endFrame(); 
 		
-		window.SetWindowName("Canis : Game Name fps : " + std::to_string(int(fps))
+		window.SetWindowName("Canis : Space Miner fps : " + std::to_string(int(fps))
 		 + " deltaTime : " + std::to_string(deltaTime)
 		 + " Enitity : " + std::to_string(entity_registry.size())
 		 + " Rendered : " + std::to_string(renderMeshSystem.entities_rendered));
