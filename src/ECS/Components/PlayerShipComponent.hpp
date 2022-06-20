@@ -12,6 +12,7 @@ struct PlayerShipComponent
     glm::vec3 camera_position_offset;
     glm::vec3 right_gun_position;
     glm::vec3 left_gun_position;
+    glm::vec3 center_gun_position;
 
     float acceleration;
     glm::vec2 velocity;
@@ -21,4 +22,5 @@ struct PlayerShipComponent
     float cool_down_time;
     float right_gun_cool_timer;
     float left_gun_cool_timer;
+    float center_gun_cool_timer;
 };

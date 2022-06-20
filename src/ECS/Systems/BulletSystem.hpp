@@ -7,8 +7,6 @@
 #include <Canis/Math.hpp>
 #include <Canis/Shader.hpp>
 #include <Canis/Debug.hpp>
-#include <Canis/Camera.hpp>
-#include <Canis/Window.hpp>
 #include <Canis/InputManager.hpp>
 #include <Canis/External/entt.hpp>
 
@@ -48,9 +46,9 @@ void UpdateComponents(float deltaTime, entt::registry &registry)
             float bullet_max_radius = bullet_sphere.radius * (std::max(std::max(bullet_transform.scale.x, 
                 bullet_transform.scale.y), bullet_transform.scale.z) * 0.5f);
 
-            auto view = registry.view<Canis::TransformComponent, Canis::SphereColliderComponent, HealthComponent>();
+            auto targets_view = registry.view<Canis::TransformComponent, Canis::SphereColliderComponent, HealthComponent>();
             bool bullet_hit = false;
-            for (auto [entity, transform, sphere, health] : view.each())
+            for (auto [entity, transform, sphere, health] : targets_view.each())
             {
                 float distance = glm::distance(transform.position, bullet_global_position);
                 // quick check

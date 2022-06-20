@@ -38,6 +38,7 @@
 #include "ECS/Systems/AsteroidSystem.hpp"
 #include "ECS/Systems/BulletSystem.hpp"
 #include "ECS/Systems/PlayerShipSystem.hpp"
+#include "ECS/Systems/RocketSystem.hpp"
 
 #include "ECS/Components/AsteroidComponent.hpp"
 #include "ECS/Components/BulletComponent.hpp"
@@ -103,6 +104,7 @@ private:
     PlayerShipSystem playerShipSystem;
     BulletSystem bulletSystem;
     AsteroidSystem asteroidSystem;
+    RocketSystem rocketSystem;
 
     Wallet wallet;
     ScoreSystem scoreSystem;

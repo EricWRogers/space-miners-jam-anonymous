@@ -366,6 +366,7 @@ void App::Update()
 	playerShipSystem.UpdateComponents(deltaTime, entity_registry);
 	bulletSystem.UpdateComponents(deltaTime, entity_registry);
 	asteroidSystem.UpdateComponents(deltaTime, entity_registry);
+	rocketSystem.UpdateComponents(deltaTime, entity_registry);
 	hudManager.Update(deltaTime, entity_registry);
 }
 void App::Draw()
@@ -438,11 +439,11 @@ void App::InputUpdate()
 			break;
 		case SDL_KEYUP:
 			inputManager.releasedKey(event.key.keysym.sym);
-			Canis::Log("UP" + std::to_string(event.key.keysym.sym));
+			//Canis::Log("UP" + std::to_string(event.key.keysym.sym));
 			break;
 		case SDL_KEYDOWN:
 			inputManager.pressKey(event.key.keysym.sym);
-			Canis::Log("DOWN");
+			//Canis::Log("DOWN");
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if(event.button.button == SDL_BUTTON_LEFT)
@@ -515,11 +516,13 @@ void App::LoadECS()
 		camera.Position,
 		glm::vec3(-0.191221f,0.079734f,0.418706f),
 		glm::vec3(0.191221f,0.079734f,0.418706f),
+		camera.Position - glm::vec3(0.0f,1.0f,0.0f),
 		5.0f,
 		glm::vec2(1.0f),
 		glm::vec2(1.0f),
 		8.0f,
 		0.5f,
+		0.0f,
 		0.0f,
 		0.0f
 	);

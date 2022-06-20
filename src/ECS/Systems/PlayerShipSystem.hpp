@@ -16,6 +16,7 @@
 
 #include "../Components/BulletComponent.hpp"
 #include "../Components/PlayerShipComponent.hpp"
+#include "../Components/RocketComponent.hpp"
 
 class PlayerShipSystem
 {
@@ -28,6 +29,7 @@ public:
 
     unsigned int right_gun_level = 1;
     unsigned int left_gun_level = 0;
+    unsigned int center_gun_level = 1;
 
     PlayerShipSystem()
     {
@@ -60,6 +62,28 @@ public:
         registry.emplace<BulletComponent>(bullet_entity,
                                           fire_speed,
                                           1.0f,
+                                          false);
+    }
+
+    void FireRocket(Canis::TransformComponent transform, entt::registry &registry, unsigned int level)
+    {
+        float fire_speed = 50.0f;
+
+        entt::entity rocket_entity = registry.create();
+        registry.emplace<Canis::TransformComponent>(rocket_entity,
+                                                    transform);
+        registry.emplace<Canis::ColorComponent>(rocket_entity,
+                                                glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        registry.emplace<Canis::MeshComponent>(rocket_entity,
+                                               bulletVAO,
+                                               bulletSize);
+        registry.emplace<Canis::SphereColliderComponent>(rocket_entity,
+                                                         glm::vec3(0.0f),
+                                                         1.5f);
+        registry.emplace<RocketComponent>(rocket_entity,
+                                          5,
+                                          fire_speed,
+                                          5.0f,
                                           false);
     }
 
@@ -116,10 +140,13 @@ public:
             // shoot
             ship.right_gun_cool_timer -= deltaTime;
             ship.left_gun_cool_timer -= deltaTime;
+            ship.center_gun_cool_timer -= deltaTime;
             if (ship.right_gun_cool_timer < 0.0f)
                 ship.right_gun_cool_timer = 0.0f;
             if (ship.left_gun_cool_timer < 0.0f)
                 ship.left_gun_cool_timer = 0.0f;
+            if (ship.center_gun_cool_timer < 0.0f)
+                ship.center_gun_cool_timer = 0.0f;
 
             if (keystate[SDL_SCANCODE_RETURN])
             {
@@ -128,7 +155,7 @@ public:
                     ship.left_gun_cool_timer = ship.cool_down_time;
                     if (left_gun_level > 1)
                         ship.left_gun_cool_timer /= 2.0f;
-                    
+
                     // fire left
                     if (left_gun_level > 0)
                     {
@@ -138,17 +165,17 @@ public:
                             ship.left_gun_position);
                         left_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
                         left_gun_transform.modelMatrix = glm::scale(left_gun_transform.modelMatrix, glm::vec3(0.1f));
-                        Fire(left_gun_transform, registry,left_gun_level);
+                        Fire(left_gun_transform, registry, left_gun_level);
                     }
                 }
 
                 if (ship.right_gun_cool_timer == 0.0f)
                 {
                     ship.right_gun_cool_timer = ship.cool_down_time;
-                
+
                     if (right_gun_level > 1)
                         ship.right_gun_cool_timer /= 2.0f;
-                    
+
                     // fire right
                     if (right_gun_level > 0)
                     {
@@ -158,9 +185,29 @@ public:
                             ship.right_gun_position);
                         right_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.1f);
                         right_gun_transform.modelMatrix = glm::scale(right_gun_transform.modelMatrix, glm::vec3(0.1f));
-                        Fire(right_gun_transform, registry,right_gun_level);
+                        Fire(right_gun_transform, registry, right_gun_level);
                     }
-                }               
+                }
+
+                if (ship.center_gun_cool_timer == 0.0f)
+                {
+                    ship.center_gun_cool_timer = ship.cool_down_time;
+
+                    //if (center_gun_level > 1)
+                    //    ship.center_gun_cool_timer /= 2.0f;
+
+                    // fire right
+                    if (center_gun_level > 0)
+                    {
+                        Canis::TransformComponent center_gun_transform = transform;
+                        center_gun_transform.modelMatrix = glm::translate(
+                            center_gun_transform.modelMatrix,
+                            ship.center_gun_position);
+                        center_gun_transform.scale = glm::vec3(0.05f, 0.05f, 0.2f);
+                        center_gun_transform.modelMatrix = glm::scale(center_gun_transform.modelMatrix, glm::vec3(0.1f));
+                        FireRocket(center_gun_transform, registry, center_gun_level);
+                    }
+                }
             }
         }
     }
