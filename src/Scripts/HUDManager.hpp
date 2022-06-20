@@ -116,7 +116,7 @@ public:
             {
             case 0: {
                 (*left_text.text) = "[2] $200 unlock rocket launcher";
-                price = 100;
+                price = 200;
                 break;
             }
             case 1: {
