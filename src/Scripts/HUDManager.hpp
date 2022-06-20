@@ -12,6 +12,7 @@
 #include "../ECS/Systems/PlayerShipSystem.hpp"
 
 #include "Wallet.hpp"
+#include "ScoreSystem.hpp"
 
 class HUDManager
 {
@@ -22,6 +23,7 @@ public:
     Canis::InputManager *inputManager;
     Canis::Window *window;
     Wallet *wallet;
+    ScoreSystem *scoreSystem;
     PlayerShipSystem *playerShipSystem;
 
     entt::entity healthText;
@@ -31,10 +33,47 @@ public:
     entt::entity right_gun_upgrade_text;
     entt::entity left_gun_upgrade_text;
 
+    float starting_seconds = 120.0f;
+    float seconds = 0.0f;
+
+    bool game_over = false;
+
+    void Init()
+    {
+        seconds = starting_seconds;
+    }
+
     void Update(float delta, entt::registry &registry)
     {
+
+        if (game_over)
+            return;
+        
         if (showingHUD)
         {
+            seconds -= delta;
+
+            if (seconds <= 0.0f)
+            {
+                game_over = true;
+
+                auto [health_transform, health_text] = registry.get<Canis::RectTransformComponent, Canis::TextComponent>(healthText);
+                health_transform.active = false;
+                auto [wallet_transform, wallet_text] = registry.get<Canis::RectTransformComponent, Canis::TextComponent>(walletText);
+                wallet_transform.active = false;
+                auto [score_transform, score_text] = registry.get<Canis::RectTransformComponent, Canis::TextComponent>(scoreText);
+                (*score_text.text) = "Score : " + std::to_string(scoreSystem->GetScore()) + " there is no restart thanks for playing!";
+
+                auto [right_gun_upgrade_transform, right_gun_upgrade_text_c] = registry.get<Canis::RectTransformComponent, Canis::TextComponent>(right_gun_upgrade_text);
+                right_gun_upgrade_transform.active = false;
+                auto [left_gun_upgrade_transform, left_gun_upgrade_text_c] = registry.get<Canis::RectTransformComponent, Canis::TextComponent>(left_gun_upgrade_text);
+                left_gun_upgrade_transform.active = false;
+
+                return;
+            }
+
+            auto [health_transform, health_text] = registry.get<Canis::RectTransformComponent, Canis::TextComponent>(healthText);
+            (*health_text.text) = "Timer : " + std::to_string(int(seconds));
 
             // grey out what you can not buy
             // right
@@ -108,6 +147,20 @@ public:
     void Load(entt::registry &registry)
     {
         showingHUD = true;
+
+        healthText = registry.create();
+        registry.emplace<Canis::RectTransformComponent>(healthText,
+            true, // active
+            glm::vec2(25.0f, window->GetScreenHeight() - 65.0f), // position
+            glm::vec2(0.0f, 0.0f), // rotation
+            1.0f // scale
+        );
+        registry.emplace<Canis::ColorComponent>(healthText,
+            glm::vec4(1.0f, 1.0f, 1.0f, 1.0f) // #26854c
+        );
+        registry.emplace<Canis::TextComponent>(healthText,
+            new std::string("Timer : " + std::to_string(seconds)) // text
+        );
 
         scoreText = registry.create();
         registry.emplace<Canis::RectTransformComponent>(scoreText,

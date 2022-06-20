@@ -355,7 +355,7 @@ void App::Loop()
 
 		float fps = time.endFrame(); 
 		
-		window.SetWindowName("Canis : Game Name fps : " + std::to_string(fps)
+		window.SetWindowName("Canis : Game Name fps : " + std::to_string(int(fps))
 		 + " deltaTime : " + std::to_string(deltaTime)
 		 + " Enitity : " + std::to_string(entity_registry.size())
 		 + " Rendered : " + std::to_string(renderMeshSystem.entities_rendered));
@@ -363,10 +363,13 @@ void App::Loop()
 }
 void App::Update()
 {
-	playerShipSystem.UpdateComponents(deltaTime, entity_registry);
-	bulletSystem.UpdateComponents(deltaTime, entity_registry);
-	asteroidSystem.UpdateComponents(deltaTime, entity_registry);
-	rocketSystem.UpdateComponents(deltaTime, entity_registry);
+	if (!hudManager.game_over)
+	{
+		playerShipSystem.UpdateComponents(deltaTime, entity_registry);
+		bulletSystem.UpdateComponents(deltaTime, entity_registry);
+		asteroidSystem.UpdateComponents(deltaTime, entity_registry);
+		rocketSystem.UpdateComponents(deltaTime, entity_registry);
+	}
 	hudManager.Update(deltaTime, entity_registry);
 }
 void App::Draw()
@@ -377,7 +380,10 @@ void App::Draw()
 
 	renderSkyboxSystem.UpdateComponents(deltaTime, entity_registry);
 
-	renderMeshSystem.UpdateComponents(deltaTime, entity_registry);
+	if (!hudManager.game_over)
+	{
+		renderMeshSystem.UpdateComponents(deltaTime, entity_registry);
+	}
 	
 	renderTextSystem.UpdateComponents(deltaTime, entity_registry);
 }
@@ -718,10 +724,12 @@ void App::LoadECS()
 	asteroidSystem.scoreSystem = &scoreSystem;
 	asteroidSystem.wallet = &wallet;
 
+	hudManager.scoreSystem = &scoreSystem;
 	hudManager.inputManager = &inputManager;
 	hudManager.window = &window;
 	hudManager.wallet = &wallet;
 	hudManager.playerShipSystem = &playerShipSystem;
+	hudManager.Init();
 	hudManager.Load(entity_registry);
 
 	wallet.refRegistry = &entity_registry;
