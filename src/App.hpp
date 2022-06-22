@@ -19,6 +19,8 @@
 #include <Canis/Camera.hpp>
 #include <Canis/IOManager.hpp>
 #include <Canis/InputManager.hpp>
+#include <Canis/Scene.hpp>
+#include <Canis/SceneManager.hpp>
 #include <Canis/Data/GLTexture.hpp>
 #include <Canis/Data/Vertex.hpp>
 #include <Canis/External/entt.hpp>
@@ -48,6 +50,8 @@
 #include "Scripts/ScoreSystem.hpp"
 #include "Scripts/Wallet.hpp"
 #include "Scripts/HUDManager.hpp"
+
+#include "Scenes/GameLoop.hpp"
 
 #ifdef __linux__
 using namespace std::chrono::_V2;
@@ -83,13 +87,13 @@ private:
 
     void LoadECS();
 
+    Canis::SceneManager sceneManager;
+
     AppState appState = AppState::OFF;
 
-    entt::registry entity_registry;
+    
 
     Canis::Window window;
-
-    Canis::Shader shader;
 
     Canis::Time time;
 
@@ -97,38 +101,10 @@ private:
 
     Canis::Camera camera = Canis::Camera(glm::vec3(0.0f, 0.15f, -0.3f),glm::vec3(0.0f, 1.0f, 0.0f),Canis::YAW+90.0f,Canis::PITCH+0.0f);
 
-    Canis::RenderMeshSystem renderMeshSystem;
-    Canis::RenderSkyboxSystem renderSkyboxSystem;
-    Canis::RenderTextSystem renderTextSystem;
-
-    PlayerShipSystem playerShipSystem;
-    BulletSystem bulletSystem;
-    AsteroidSystem asteroidSystem;
-    RocketSystem rocketSystem;
-
-    Wallet wallet;
-    ScoreSystem scoreSystem;
-    HUDManager hudManager;
-
-    // move out to external class
-    unsigned int whiteCubeVAO, whiteCubeVBO,
-                asteroidVAO, asteroidVBO,
-                asteroidMetalVAO, asteroidMetalVBO,
-                playerVAO, playerVBO,
-                playerGlassVAO, playerGlassVBO;
-
-    int whiteCubeSize, asteroidSize, asteroidMetalSize, playerSize, playerGlassSize;
-
-    Canis::GLTexture texture = {};
-
-    Canis::GLTexture diffuseColorPaletteTexture = {};
-    Canis::GLTexture specularColorPaletteTexture = {};
-
     float lastXMousePos;
     float lastYMousePos;
     
-    bool firstMouseMove = true;
-    bool mouseLock = false;
+   
 
     high_resolution_clock::time_point currentTime;
     high_resolution_clock::time_point previousTime;
