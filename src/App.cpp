@@ -65,7 +65,7 @@ void App::Run()
 
 	unsigned int windowFlags = 0;
 
-	// windowFlags |= Canis::WindowFlags::FULLSCREEN;
+	//windowFlags |= Canis::WindowFlags::FULLSCREEN;
 
 	// windowFlags |= Canis::WindowFlags::BORDERLESS;
 

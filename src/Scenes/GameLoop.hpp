@@ -54,14 +54,6 @@
 #include "../Scripts/Wallet.hpp"
 #include "../Scripts/HUDManager.hpp"
 
-#ifdef __linux__
-using namespace std::chrono::_V2;
-#elif _WIN32
-using namespace std::chrono;
-#else
-
-#endif
-
 class GameLoop : public Canis::Scene
 {
     private:
@@ -69,18 +61,18 @@ class GameLoop : public Canis::Scene
 
         Canis::Shader shader;
 
-        Canis::RenderMeshSystem renderMeshSystem;
-        Canis::RenderSkyboxSystem renderSkyboxSystem;
-        Canis::RenderTextSystem renderTextSystem;
+        Canis::RenderMeshSystem *renderMeshSystem;
+        Canis::RenderSkyboxSystem *renderSkyboxSystem;
+        Canis::RenderTextSystem *renderTextSystem;
 
-        PlayerShipSystem playerShipSystem;
-        BulletSystem bulletSystem;
-        AsteroidSystem asteroidSystem;
-        RocketSystem rocketSystem;
+        PlayerShipSystem *playerShipSystem;
+        BulletSystem *bulletSystem;
+        AsteroidSystem *asteroidSystem;
+        RocketSystem *rocketSystem;
 
-        Wallet wallet;
-        ScoreSystem scoreSystem;
-        HUDManager hudManager;
+        Wallet *wallet;
+        ScoreSystem *scoreSystem;
+        HUDManager *hudManager;
 
          bool firstMouseMove = true;
         bool mouseLock = false;
@@ -103,12 +95,16 @@ class GameLoop : public Canis::Scene
 
     public:
         GameLoop(std::string _name) : Canis::Scene(_name) {}
+        ~GameLoop()
+        {
+            delete renderSkyboxSystem;
+            delete renderMeshSystem;
+            delete renderTextSystem;
+        }
         
         void PreLoad()
         {
-            Canis::Log("Q PreLoad 0");
             Canis::Scene::PreLoad();
-            Canis::Log("Q PreLoad 1");
 
             // configure global opengl state
             glEnable(GL_DEPTH_TEST);
@@ -124,8 +120,8 @@ class GameLoop : public Canis::Scene
             shader.Link();
 
             // Load color palette
-            diffuseColorPaletteTexture = Canis::LoadPNGToGLTexture("assets/textures/palette/diffuse.png", GL_RGBA, GL_RGBA);
-            specularColorPaletteTexture = Canis::LoadPNGToGLTexture("assets/textures/palette/specular.png", GL_RGBA, GL_RGBA);
+            diffuseColorPaletteTexture = Canis::LoadImageToGLTexture("assets/textures/palette/diffuse.png", GL_RGBA, GL_RGBA);
+            specularColorPaletteTexture = Canis::LoadImageToGLTexture("assets/textures/palette/specular.png", GL_RGBA, GL_RGBA);
 
             std::vector<glm::vec3> vertices;
             std::vector<glm::vec2> uvs;
@@ -147,11 +143,19 @@ class GameLoop : public Canis::Scene
             whiteCubeSize = vecVertex.size();
             Canis::Log("s " + std::to_string(vecVertex.size()));
 
+            #ifdef __ANDROID__
+            genVertexArraysOES(1,&whiteCubeVAO);
+            #else
             glGenVertexArrays(1, &whiteCubeVAO);
+            #endif
             glGenBuffers(1, &whiteCubeVBO);
 
             // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+            #ifdef __ANDROID__
+            bindVertexArrayOES(whiteCubeVAO);
+            #else
             glBindVertexArray(whiteCubeVAO);
+            #endif
 
             glBindBuffer(GL_ARRAY_BUFFER, whiteCubeVBO);
             glBufferData(GL_ARRAY_BUFFER, vecVertex.size() * sizeof(Canis::Vertex), &vecVertex[0], GL_STATIC_DRAW);
@@ -169,7 +173,11 @@ class GameLoop : public Canis::Scene
             // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+            #ifdef __ANDROID__
+            bindVertexArrayOES(0);
+            #else
             glBindVertexArray(0);
+            #endif
 
             // asteroid
 
@@ -192,11 +200,19 @@ class GameLoop : public Canis::Scene
             asteroidSize = vecVertex.size();
             Canis::Log("s " + std::to_string(vecVertex.size()));
 
+            #ifdef __ANDROID__
+            genVertexArraysOES(1,&asteroidVAO);
+            #else
             glGenVertexArrays(1, &asteroidVAO);
+            #endif
             glGenBuffers(1, &asteroidVBO);
 
             // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+            #ifdef __ANDROID__
+            bindVertexArrayOES(asteroidVAO);
+            #else
             glBindVertexArray(asteroidVAO);
+            #endif
 
             glBindBuffer(GL_ARRAY_BUFFER, asteroidVBO);
             glBufferData(GL_ARRAY_BUFFER, vecVertex.size() * sizeof(Canis::Vertex), &vecVertex[0], GL_STATIC_DRAW);
@@ -214,7 +230,11 @@ class GameLoop : public Canis::Scene
             // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+            #ifdef __ANDROID__
+            bindVertexArrayOES(0);
+            #else
             glBindVertexArray(0);
+            #endif
 
             // asteroid_metal
 
@@ -237,11 +257,19 @@ class GameLoop : public Canis::Scene
             asteroidMetalSize = vecVertex.size();
             Canis::Log("s " + std::to_string(vecVertex.size()));
 
+            #ifdef __ANDROID__
+            genVertexArraysOES(1,&asteroidMetalVAO);
+            #else
             glGenVertexArrays(1, &asteroidMetalVAO);
+            #endif
             glGenBuffers(1, &asteroidMetalVBO);
 
             // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+            #ifdef __ANDROID__
+            bindVertexArrayOES(asteroidMetalVAO);
+            #else
             glBindVertexArray(asteroidMetalVAO);
+            #endif
 
             glBindBuffer(GL_ARRAY_BUFFER, asteroidMetalVBO);
             glBufferData(GL_ARRAY_BUFFER, vecVertex.size() * sizeof(Canis::Vertex), &vecVertex[0], GL_STATIC_DRAW);
@@ -259,7 +287,11 @@ class GameLoop : public Canis::Scene
             // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+            #ifdef __ANDROID__
+            bindVertexArrayOES(0);
+            #else
             glBindVertexArray(0);
+            #endif
 
             // player
 
@@ -282,11 +314,19 @@ class GameLoop : public Canis::Scene
             playerSize = vecVertex.size();
             Canis::Log("s " + std::to_string(vecVertex.size()));
 
+            #ifdef __ANDROID__
+            genVertexArraysOES(1,&playerVAO);
+            #else
             glGenVertexArrays(1, &playerVAO);
+            #endif
             glGenBuffers(1, &playerVBO);
 
             // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+            #ifdef __ANDROID__
+            bindVertexArrayOES(playerVAO);
+            #else
             glBindVertexArray(playerVAO);
+            #endif
 
             glBindBuffer(GL_ARRAY_BUFFER, playerVBO);
             glBufferData(GL_ARRAY_BUFFER, vecVertex.size() * sizeof(Canis::Vertex), &vecVertex[0], GL_STATIC_DRAW);
@@ -304,7 +344,13 @@ class GameLoop : public Canis::Scene
             // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+            #ifdef __ANDROID__
+            bindVertexArrayOES(0);
+            #else
             glBindVertexArray(0);
+            #endif
+            
+            
 
             // player glass
 
@@ -327,11 +373,19 @@ class GameLoop : public Canis::Scene
             playerGlassSize = vecVertex.size();
             Canis::Log("s " + std::to_string(vecVertex.size()));
 
+            #ifdef __ANDROID__
+            genVertexArraysOES(1,&playerGlassVAO);
+            #else
             glGenVertexArrays(1, &playerGlassVAO);
+            #endif
             glGenBuffers(1, &playerGlassVBO);
 
             // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+            #ifdef __ANDROID__
+            bindVertexArrayOES(playerGlassVAO);
+            #else
             glBindVertexArray(playerGlassVAO);
+            #endif
 
             glBindBuffer(GL_ARRAY_BUFFER, playerGlassVBO);
             glBufferData(GL_ARRAY_BUFFER, vecVertex.size() * sizeof(Canis::Vertex), &vecVertex[0], GL_STATIC_DRAW);
@@ -349,15 +403,60 @@ class GameLoop : public Canis::Scene
             // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+            #ifdef __ANDROID__
+            bindVertexArrayOES(0);
+            #else
             glBindVertexArray(0);
+            #endif
+
+            renderSkyboxSystem = new Canis::RenderSkyboxSystem();
+            renderMeshSystem = new Canis::RenderMeshSystem();
+            renderTextSystem = new Canis::RenderTextSystem();
+
+            renderSkyboxSystem->faces = std::vector<std::string>
+            {
+                "assets/textures/space-nebulas-skybox/skybox_left.png",
+                "assets/textures/space-nebulas-skybox/skybox_right.png",
+                "assets/textures/space-nebulas-skybox/skybox_up.png",
+                "assets/textures/space-nebulas-skybox/skybox_down.png",
+                "assets/textures/space-nebulas-skybox/skybox_front.png",
+                "assets/textures/space-nebulas-skybox/skybox_back.png"
+            };
+
+            renderSkyboxSystem->window = window;
+            renderSkyboxSystem->camera = camera;
+            renderSkyboxSystem->Init();
+
+            renderTextSystem->camera = camera;
+            renderTextSystem->window = window;
+            renderTextSystem->Init();
+
+            renderMeshSystem->shader = &shader;
+            renderMeshSystem->camera = camera;
+            renderMeshSystem->window = window;
+            renderMeshSystem->diffuseColorPaletteTexture = &diffuseColorPaletteTexture;
+            renderMeshSystem->specularColorPaletteTexture = &specularColorPaletteTexture;
 
             // Draw mode
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
         void Load()
-        {
-            Canis::Log("Q");
+        {            
+            camera->Position = glm::vec3(0.0f,0.15f,-0.3f);
+            camera->WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+            camera->Pitch = Canis::PITCH+0.0f;
+            camera->Yaw = Canis::YAW+90.0f;
+            camera->UpdateCameraVectors();
+
+            playerShipSystem = new PlayerShipSystem();
+            bulletSystem = new BulletSystem();
+            asteroidSystem = new AsteroidSystem();
+            rocketSystem = new RocketSystem();
+
+            wallet = new Wallet();
+            scoreSystem = new ScoreSystem();
+            hudManager =  new HUDManager();
 
             window->MouseLock(mouseLock);
 
@@ -381,7 +480,7 @@ class GameLoop : public Canis::Scene
                 1.5f
             );
 
-            const auto player_ship_body = entity_registry.create();
+            auto player_ship_body = entity_registry.create();
             entity_registry.emplace<Canis::TransformComponent>(player_ship_body,
                 true, // active
                 glm::vec3(0.0f, 0.0f, 0.0f), // position
@@ -400,7 +499,7 @@ class GameLoop : public Canis::Scene
                 1.5f
             );
 
-            const entt::entity player_ship = entity_registry.create();
+            entt::entity player_ship = entity_registry.create();
             entity_registry.emplace<Canis::TransformComponent>(player_ship,
                 true, // active
                 glm::vec3(0.0f, 0.0f, 0.0f), // position
@@ -500,7 +599,7 @@ class GameLoop : public Canis::Scene
                 // TODO : randomize rotation
 
                 // create entity
-                const auto entity = entity_registry.create();
+                auto entity = entity_registry.create();
                 entity_registry.emplace<Canis::TransformComponent>(entity,
                     true, // active
                     position_info.position, // position
@@ -578,7 +677,7 @@ class GameLoop : public Canis::Scene
                 // TODO : randomize rotation
 
                 // create entity
-                const auto entity = entity_registry.create();
+                auto entity = entity_registry.create();
                 entity_registry.emplace<Canis::TransformComponent>(entity,
                     true, // active
                     position_info.position, // position
@@ -609,69 +708,55 @@ class GameLoop : public Canis::Scene
                 current_num_of_metal_asteroid++;
             }
 
-            renderSkyboxSystem.faces = std::vector<std::string>
-            {
-                "assets/textures/space-nebulas-skybox/skybox_left.png",
-                "assets/textures/space-nebulas-skybox/skybox_right.png",
-                "assets/textures/space-nebulas-skybox/skybox_up.png",
-                "assets/textures/space-nebulas-skybox/skybox_down.png",
-                "assets/textures/space-nebulas-skybox/skybox_front.png",
-                "assets/textures/space-nebulas-skybox/skybox_back.png"
-            };
+            asteroidSystem->scoreSystem = scoreSystem;
+            asteroidSystem->wallet = wallet;
 
-            asteroidSystem.scoreSystem = &scoreSystem;
-            asteroidSystem.wallet = &wallet;
+            hudManager->scoreSystem = scoreSystem;
+            hudManager->inputManager = inputManager;
+            hudManager->window = window;
+            hudManager->wallet = wallet;
+            hudManager->playerShipSystem = playerShipSystem;
+            hudManager->Init();
+            hudManager->Load(entity_registry);
 
-            hudManager.scoreSystem = &scoreSystem;
-            hudManager.inputManager = inputManager;
-            hudManager.window = window;
-            hudManager.wallet = &wallet;
-            hudManager.playerShipSystem = &playerShipSystem;
-            hudManager.Init();
-            hudManager.Load(entity_registry);
+            wallet->refRegistry = &entity_registry;
+            wallet->walletText = hudManager->walletText;
+            wallet->SetCash(50);
 
-            wallet.refRegistry = &entity_registry;
-            wallet.walletText = hudManager.walletText;
-            wallet.SetCash(50);
-
-            scoreSystem.refRegistry = &entity_registry;
-            scoreSystem.scoreText = hudManager.scoreText;
+            scoreSystem->refRegistry = &entity_registry;
+            scoreSystem->scoreText = hudManager->scoreText;
             
-            playerShipSystem.camera = camera;
-            playerShipSystem.input_manager = inputManager;
-            playerShipSystem.bulletVAO = whiteCubeVAO;
-            playerShipSystem.bulletSize = whiteCubeSize;
-
-            renderSkyboxSystem.window = window;
-            renderSkyboxSystem.camera = camera;
-            renderSkyboxSystem.Init();
-
-            renderTextSystem.camera = camera;
-            renderTextSystem.window = window;
-            renderTextSystem.Init();
-
-            renderMeshSystem.shader = &shader;
-            renderMeshSystem.camera = camera;
-            renderMeshSystem.window = window;
-            renderMeshSystem.diffuseColorPaletteTexture = &diffuseColorPaletteTexture;
-            renderMeshSystem.specularColorPaletteTexture = &specularColorPaletteTexture;
+            playerShipSystem->camera = camera;
+            playerShipSystem->input_manager = inputManager;
+            playerShipSystem->bulletVAO = whiteCubeVAO;
+            playerShipSystem->bulletSize = whiteCubeSize;
         }
 
         void UnLoad()
         {
+            Canis::Log("Canis Clear");
+            entity_registry.clear();
 
+            delete playerShipSystem;
+            delete bulletSystem;
+            delete asteroidSystem;
+            delete rocketSystem;
+
+            delete wallet;
+            delete scoreSystem;
+            delete hudManager;
         }
 
         void Update()
         {
-            if (!hudManager.game_over)
+            if (!hudManager->game_over)
             {
-                playerShipSystem.UpdateComponents(deltaTime, entity_registry);
-                bulletSystem.UpdateComponents(deltaTime, entity_registry);
-                asteroidSystem.UpdateComponents(deltaTime, entity_registry);
-                rocketSystem.UpdateComponents(deltaTime, entity_registry);
+                playerShipSystem->UpdateComponents(deltaTime, entity_registry);
+                bulletSystem->UpdateComponents(deltaTime, entity_registry);
+                asteroidSystem->UpdateComponents(deltaTime, entity_registry);
+                rocketSystem->UpdateComponents(deltaTime, entity_registry);
             }
-            hudManager.Update(deltaTime, entity_registry);
+            hudManager->Update(deltaTime, entity_registry);
         }
 
         void LateUpdate()
@@ -703,6 +788,12 @@ class GameLoop : public Canis::Scene
 
                 window->MouseLock(mouseLock);
             }
+
+            if (inputManager->justPressedKey(SDLK_F5))
+            {
+                Canis::Log("Load Scene");
+                ((Canis::SceneManager*)sceneManager)->Load("GameLoop");
+            }
         }
 
         void Draw()
@@ -711,19 +802,19 @@ class GameLoop : public Canis::Scene
             glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
-            renderSkyboxSystem.UpdateComponents(deltaTime, entity_registry);
+            renderSkyboxSystem->UpdateComponents(deltaTime, entity_registry);
 
-            if (!hudManager.game_over)
+            if (!hudManager->game_over)
             {
-                renderMeshSystem.UpdateComponents(deltaTime, entity_registry);
+                renderMeshSystem->UpdateComponents(deltaTime, entity_registry);
             }
             
-            renderTextSystem.UpdateComponents(deltaTime, entity_registry);
+            renderTextSystem->UpdateComponents(deltaTime, entity_registry);
 
             window->SetWindowName("Canis : Space Miner fps : " + std::to_string(int(window->fps))
             + " deltaTime : " + std::to_string(deltaTime)
             + " Enitity : " + std::to_string(entity_registry.size())
-            + " Rendered : " + std::to_string(renderMeshSystem.entities_rendered));
+            + " Rendered : " + std::to_string(renderMeshSystem->entities_rendered));
         }
 
         void InputUpdate()

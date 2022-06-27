@@ -10,6 +10,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#ifdef __ANDROID__
+    #include <android/log.h>
+    #define LOGW(...) __android_log_print(ANDROID_LOG_WARN,__VA_ARGS__)
+#endif
+
 #include <Canis/Canis.hpp>
 #include <Canis/Debug.hpp>
 #include <Canis/Math.hpp>
@@ -52,14 +57,6 @@
 #include "Scripts/HUDManager.hpp"
 
 #include "Scenes/GameLoop.hpp"
-
-#ifdef __linux__
-using namespace std::chrono::_V2;
-#elif _WIN32
-using namespace std::chrono;
-#else
-
-#endif
 
 
 enum AppState
